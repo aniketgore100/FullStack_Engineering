@@ -10,7 +10,7 @@ import { NavLink } from "react-router-dom";
 
 const settings = { 
   label: "Settings", to: "/settings", icon: Settings,
-  label: "Generate", to: "/generate", icon: Sparkles
+  label: "Generate", to: "/app", icon: Sparkles
 };
 
 function Item({ item, collapsed, onNavigate }) {

@@ -1,4 +1,5 @@
 import { Bell, Menu, Zap } from "lucide-react";
+import UserMenu from "./UserMenu";
 
 export default function Navbar({ onMenu }) {
   return (
@@ -24,6 +25,8 @@ export default function Navbar({ onMenu }) {
           <Bell size={16} />
           <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-indigo-500 ring-2 ring-cream" />
         </button>
+
+        <UserMenu />
       </div>
     </header>
   );

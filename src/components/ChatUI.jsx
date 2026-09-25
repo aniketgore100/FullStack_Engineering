@@ -1,10 +1,19 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { peekPendingPrompt, takePendingPrompt } from '../lib/pendingPrompt'
 
 const MAX_HEIGHT = 200
 
+const newMessage = (text) => ({ id: crypto.randomUUID(), role: "user", text })
+
 export default function ChatUI() {
   const [prompt, setPrompt] = useState("");
+  // A prompt typed on the landing page before signing in is processed on arrival.
+  const [messages, setMessages] = useState(() => {
+    const pending = peekPendingPrompt();
+    return pending ? [newMessage(pending)] : [];
+  });
   const textareaRef = useRef(null);
+  const bottomRef = useRef(null);
 
   useEffect(() => {
     const el = textareaRef.current;
@@ -15,7 +24,30 @@ export default function ChatUI() {
 
   const canSend = prompt.trim().length > 0;
 
+  // Single entry point for every prompt, typed here or carried over from the landing page.
+  const processPrompt = (text) => {
+    const clean = text.trim();
+    if (!clean) {
+      return;
+    }
+    // TODO: call the generation API here
+    setMessages((m) => [...m, newMessage(clean)]);
+  };
+
+  // Clear it only after it has been shown, so it is never processed twice.
+  useEffect(() => {
+    takePendingPrompt();
+  }, []);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages]);
+
   const handleSubmit = () => {
+    if (!canSend) {
+      return;
+    }
+    processPrompt(prompt);
     setPrompt("");
   };
 
@@ -28,6 +60,19 @@ export default function ChatUI() {
 
   return (
     <div className="relative h-full">
+      <div className="h-full overflow-y-auto px-4 pt-6 pb-36">
+        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
+          {messages.map((m) => (
+            <div key={m.id} className="flex justify-end">
+              <p className="max-w-[85%] rounded-3xl rounded-br-lg bg-zinc-900 px-4 py-2.5 text-[15px] leading-6 whitespace-pre-wrap text-white">
+                {m.text}
+              </p>
+            </div>
+          ))}
+          <div ref={bottomRef} />
+        </div>
+      </div>
+
       <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
         <div className="mx-auto w-full max-w-3xl">
           <div className="flex items-end gap-2 rounded-3xl border border-zinc-200 bg-white px-4 py-2.5 shadow-lg transition focus-within:border-zinc-300 focus-within:shadow-xl">

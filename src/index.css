@@ -3,6 +3,8 @@
 @theme {
   --color-cream: #f7f6f2;
   --color-cream-dark: #efede6;
+  --color-brand: #393fe7;
+  --font-display: Urbanist, Inter, ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -27,6 +29,51 @@ body {
   background-color: var(--color-cream);
   background-image: radial-gradient(#d6d3cb 1px, transparent 1px);
   background-size: 22px 22px;
+}
+
+/* landing */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.hero-glow {
+  background:
+    radial-gradient(60% 50% at 50% 0%, rgb(57 63 231 / 0.18), transparent 70%),
+    radial-gradient(40% 35% at 85% 10%, rgb(167 139 250 / 0.22), transparent 70%),
+    radial-gradient(40% 35% at 10% 15%, rgb(56 189 248 / 0.16), transparent 70%);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes caret {
+  50% { opacity: 0; }
+}
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: -0.12em;
+  background: var(--color-brand);
+  animation: caret 1s steps(1) infinite;
+}
+
+/* Lenis */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent] {
+  overscroll-behavior: contain;
 }
 
 @media (prefers-reduced-motion: reduce) {
