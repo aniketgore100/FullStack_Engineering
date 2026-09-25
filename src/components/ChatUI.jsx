@@ -1,108 +1,67 @@
-import { ArrowUp, Loader2, Sparkles } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from 'react'
 
-const suggestions = [
-  "Learn Python from scratch",
-  "Understand how the stock market works",
-  "Get started with UI design",
-  "Machine learning, explained simply",
-];
+const MAX_HEIGHT = 200
 
-
-export const ChatUI = ({ onSubmit, loading = false, children }) => {
+export default function ChatUI() {
   const [prompt, setPrompt] = useState("");
-  const areaRef = useRef(null);
-  const canSend = prompt.trim().length > 0 && !loading;
+  const textareaRef = useRef(null);
 
   useEffect(() => {
-    const el = areaRef.current;
+    const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
   }, [prompt]);
 
-  const send = () => {
-    if (!canSend) return;
-    onSubmit?.(prompt.trim());
+  const canSend = prompt.trim().length > 0;
+
+  const handleSubmit = () => {
     setPrompt("");
   };
 
-  const onKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      send();
+      handleSubmit();
     }
   };
 
   return (
-    <div className="flex h-full flex-col">
-      {/* results */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-4">
-        <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col py-6">
-          {children ?? (
-            <div className="m-auto flex flex-col items-center text-center">
-              <div className="mb-4 grid h-10 w-10 place-items-center rounded-xl border border-zinc-200 bg-white shadow-sm">
-                <Sparkles size={18} className="text-indigo-600" />
-              </div>
-              <h2 className="text-xl font-semibold tracking-tight text-zinc-900 sm:text-2xl">
-                What do you want to learn?
-              </h2>
-              <p className="mt-1.5 max-w-sm text-[13px] text-zinc-500">
-                Tell us a topic and your level. We&apos;ll build a course
-                around you, with lessons, examples and quizzes.
-              </p>
-
-              <div className="mt-5 flex flex-wrap justify-center gap-1.5">
-                {suggestions.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => {
-                      setPrompt(s);
-                      areaRef.current?.focus();
-                    }}
-                    className="rounded-full border border-zinc-200 bg-white/70 px-3 py-1 text-[12px] text-zinc-600 transition hover:border-zinc-300 hover:bg-white hover:text-zinc-900 active:scale-[0.97]"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* prompt box, pinned at the bottom */}
-      <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+    <div className="relative h-full">
+      <div className="absolute inset-x-0 bottom-0 px-4 pb-4">
         <div className="mx-auto w-full max-w-3xl">
-          <div className="flex items-end gap-2 rounded-2xl border border-zinc-200 bg-white p-2 shadow-sm transition focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-100/70">
+          <div className="flex items-end gap-2 rounded-3xl border border-zinc-200 bg-white px-4 py-2.5 shadow-lg transition focus-within:border-zinc-300 focus-within:shadow-xl">
             <textarea
-              ref={areaRef}
+              ref={textareaRef}
               rows={1}
               value={prompt}
-              disabled={loading}
               onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder="What do you want to learn? Add your level or goal for a better course..."
-              className="max-h-40 min-h-8 flex-1 resize-none bg-transparent px-2 py-1.5 text-[14px] leading-5 text-zinc-900 outline-none placeholder:text-zinc-400 disabled:opacity-60"
+              onKeyDown={handleKeyDown}
+              placeholder="Message..."
+              className="max-h-50 flex-1 resize-none bg-transparent py-1.5 text-base leading-6 text-zinc-900 outline-none placeholder:text-zinc-400"
             />
             <button
-              onClick={send}
+              type="button"
+              onClick={handleSubmit}
               disabled={!canSend}
-              aria-label="Generate my course"
-              className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-indigo-600 text-white transition hover:bg-indigo-700 active:scale-95 disabled:bg-zinc-200 disabled:text-zinc-400"
+              aria-label="Send message"
+              className="mb-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-200 disabled:text-zinc-400"
             >
-              {loading ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <ArrowUp size={16} strokeWidth={2.5} />
-              )}
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
             </button>
           </div>
-          <p className="mt-1.5 text-center text-[11px] text-zinc-400">
-            Enter to build your course · Shift + Enter for a new line
-          </p>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}

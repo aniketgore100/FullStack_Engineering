@@ -1,20 +1,23 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import { Outlet } from "react-router-dom";
 
 const KEY = "sidebar-collapsed";
 
 export default function AppLayout({ children }) {
+
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem(KEY) === "1",
   );
   const [mobileOpen, setMobileOpen] = useState(false);
 
+
   useEffect(() => {
     localStorage.setItem(KEY, collapsed ? "1" : "0");
   }, [collapsed]);
 
-  // drawer: esc to close, lock page scroll, auto-close when resized to desktop
+
   useEffect(() => {
     if (!mobileOpen) return;
 
@@ -35,16 +38,23 @@ export default function AppLayout({ children }) {
 
   return (
     <div className="flex h-dvh bg-cream text-zinc-900">
+
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((c) => !c)}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
       />
+
       <div className="flex min-w-0 flex-1 flex-col">
-        <Navbar onMenu={() => setMobileOpen(true)} />
-        <main className="bg-dots min-h-0 flex-1 overflow-hidden">{children}</main>
+        <Navbar
+          onMenu={() =>
+            setMobileOpen(true)}
+        />
+
+        <main className="bg-dots min-h-0 flex-1 overflow-hidden"><Outlet/></main>
       </div>
+
     </div>
   );
 }
