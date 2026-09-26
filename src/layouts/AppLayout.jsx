@@ -1,29 +1,21 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import { Outlet } from "react-router-dom";
+import { setMobileNavOpen, toggleSidebar } from "../app/slices/uiSlice";
 
-const KEY = "sidebar-collapsed";
-
-export default function AppLayout({ children }) {
-
-  const [collapsed, setCollapsed] = useState(
-    () => localStorage.getItem(KEY) === "1",
-  );
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-
-  useEffect(() => {
-    localStorage.setItem(KEY, collapsed ? "1" : "0");
-  }, [collapsed]);
-
+export default function AppLayout() {
+  const dispatch = useDispatch();
+  const collapsed = useSelector((state) => state.ui.sidebarCollapsed);
+  const mobileOpen = useSelector((state) => state.ui.mobileNavOpen);
 
   useEffect(() => {
     if (!mobileOpen) return;
 
-    const onKey = (e) => e.key === "Escape" && setMobileOpen(false);
+    const onKey = (e) => e.key === "Escape" && dispatch(setMobileNavOpen(false));
     const mq = window.matchMedia("(min-width: 768px)");
-    const onResize = (e) => e.matches && setMobileOpen(false);
+    const onResize = (e) => e.matches && dispatch(setMobileNavOpen(false));
 
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKey);
@@ -34,22 +26,22 @@ export default function AppLayout({ children }) {
       window.removeEventListener("keydown", onKey);
       mq.removeEventListener("change", onResize);
     };
-  }, [mobileOpen]);
+  }, [mobileOpen, dispatch]);
 
   return (
     <div className="flex h-dvh bg-cream text-zinc-900">
 
       <Sidebar
         collapsed={collapsed}
-        onToggle={() => setCollapsed((c) => !c)}
+        onToggle={() => dispatch(toggleSidebar())}
         mobileOpen={mobileOpen}
-        onMobileClose={() => setMobileOpen(false)}
+        onMobileClose={() => dispatch(setMobileNavOpen(false))}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Navbar
           onMenu={() =>
-            setMobileOpen(true)}
+            dispatch(setMobileNavOpen(true))}
         />
 
         <main className="bg-dots min-h-0 flex-1 overflow-hidden"><Outlet/></main>

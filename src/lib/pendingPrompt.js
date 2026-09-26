@@ -10,14 +10,6 @@ export function savePendingPrompt(text) {
   }
 }
 
-// Non-destructive read (safe to call from a state initializer).
-export function peekPendingPrompt() {
-  try {
-    return sessionStorage.getItem(KEY) || null;
-  } catch {
-    return null;
-  }
-}
 
 // Read-and-clear, so a prompt is only ever processed once.
 export function takePendingPrompt() {

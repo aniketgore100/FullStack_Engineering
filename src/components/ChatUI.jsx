@@ -1,47 +1,46 @@
 import { useEffect, useRef, useState } from 'react'
-import { peekPendingPrompt, takePendingPrompt } from '../lib/pendingPrompt'
+import { useDispatch, useSelector } from 'react-redux'
+import { addMessage, selectMessages } from '../app/slices/chatSlice'
+import { takePendingPrompt } from '../lib/pendingPrompt'
+import { useGenerateMutation } from '../services/api'
 
 const MAX_HEIGHT = 200
 
-const newMessage = (text) => ({ id: crypto.randomUUID(), role: "user", text })
-
 export default function ChatUI() {
+  const dispatch = useDispatch();
+  const messages = useSelector(selectMessages);
+  const [generate, { isLoading }] = useGenerateMutation();
+
   const [prompt, setPrompt] = useState("");
-  // A prompt typed on the landing page before signing in is processed on arrival.
-  const [messages, setMessages] = useState(() => {
-    const pending = peekPendingPrompt();
-    return pending ? [newMessage(pending)] : [];
-  });
   const textareaRef = useRef(null);
   const bottomRef = useRef(null);
 
-  useEffect(() => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
-  }, [prompt]);
-
   const canSend = prompt.trim().length > 0;
 
-  // Single entry point for every prompt, typed here or carried over from the landing page.
-  const processPrompt = (text) => {
-    const clean = text.trim();
-    if (!clean) {
+  const processPrompt = async (text) => {
+    const cleanPrompt = text.trim();
+    if (!cleanPrompt) {
       return;
     }
-    // TODO: call the generation API here
-    setMessages((m) => [...m, newMessage(clean)]);
+
+    dispatch(addMessage(cleanPrompt));
+
+    try {
+      const response = await generate(cleanPrompt).unwrap();
+      dispatch(addMessage(response.text, "assistant"));
+    } catch (err) {
+      console.error("generation failed :: ", err);
+      dispatch(addMessage("Something went wrong. Please try again.", "assistant"));
+    }
   };
 
-  // Clear it only after it has been shown, so it is never processed twice.
+  
   useEffect(() => {
-    takePendingPrompt();
+    const pending = takePendingPrompt();
+    if (pending) {
+      processPrompt(pending);
+    }
   }, []);
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
 
   const handleSubmit = () => {
     if (!canSend) {
@@ -51,6 +50,7 @@ export default function ChatUI() {
     setPrompt("");
   };
 
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
@@ -58,17 +58,40 @@ export default function ChatUI() {
     }
   };
 
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) {
+      return;
+    }
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
+  }, [prompt]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages, isLoading]);
+
+
   return (
     <div className="relative h-full">
       <div className="h-full overflow-y-auto px-4 pt-6 pb-36">
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
           {messages.map((m) => (
-            <div key={m.id} className="flex justify-end">
-              <p className="max-w-[85%] rounded-3xl rounded-br-lg bg-zinc-900 px-4 py-2.5 text-[15px] leading-6 whitespace-pre-wrap text-white">
+            <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+              <p
+                className={`max-w-[85%] rounded-3xl px-4 py-2.5 text-[15px] leading-6 whitespace-pre-wrap ${
+                  m.role === "user"
+                    ? "rounded-br-lg bg-zinc-900 text-white"
+                    : "rounded-bl-lg border border-zinc-200 bg-white text-zinc-800"
+                }`}
+              >
                 {m.text}
               </p>
             </div>
           ))}
+          {isLoading && (
+            <p className="text-sm text-zinc-400" role="status">Thinking…</p>
+          )}
           <div ref={bottomRef} />
         </div>
       </div>

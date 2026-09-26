@@ -12,7 +12,7 @@ import {
   Wand2,
   Zap,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 import GoogleButton from "../components/landing/GoogleButton";
 import Reveal from "../components/landing/Reveal";
 import SmoothScroll from "../components/landing/SmoothScroll";

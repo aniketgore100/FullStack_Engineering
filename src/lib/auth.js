@@ -44,7 +44,7 @@ export const SESSION_EXPIRED_EVENT = "auth:session-expired";
 
 let refreshing = null; // single-flight: concurrent 401s share one refresh call
 
-function refreshTokens() {
+export function refreshTokens() {
   refreshing ??= (async () => {
     const refreshToken = getRefreshToken();
     if (!refreshToken) return false;
