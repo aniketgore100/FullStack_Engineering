@@ -3,7 +3,6 @@ import { ACCESS_TTL_SECONDS, config } from "./config.js";
 
 const key = () => new TextEncoder().encode(config.jwtSecret);
 
-// Short-lived, stateless access token: just the user id.
 export const signAccessToken = (userId) =>
   new SignJWT({})
     .setProtectedHeader({ alg: "HS256" })

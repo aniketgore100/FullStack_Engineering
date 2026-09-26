@@ -8,19 +8,69 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  googleId      String         @unique
-  email         String         @unique
-  name          String
-  picture       String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  lastLoginAt   DateTime       @default(now())
-  refreshTokens RefreshToken[]
+  id                String             @id @default(cuid())
+  googleId          String             @unique
+  email             String             @unique
+  name              String
+  picture           String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  lastLoginAt       DateTime           @default(now())
+  refreshTokens     RefreshToken[]
+  courseGenerations CourseGeneration[]
 
   @@map("users")
 }
 
+model CourseGeneration {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prompt    String
+  status    GenerationStatus @default(PENDING)
+  course    Course?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("course_generations")
+}
+
+model Course {
+  id           String           @id @default(cuid())
+  generationId String           @unique
+  generation   CourseGeneration @relation(fields: [generationId], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  modules      CourseModule[]
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@map("courses")
+}
+
+model CourseModule {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([courseId, order])
+  @@index([courseId])
+  @@map("course_modules")
+}
+
+enum GenerationStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
 
 model RefreshToken {
   id        String    @id @default(cuid())

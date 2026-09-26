@@ -3,6 +3,7 @@ import cors from "cors";
 import morgan from "morgan";
 import { config } from "./lib/config.js";
 import authRouter from "./routes/auth.js";
+import promptRouter from "./routes/prompt.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRouter);
+app.use("/api/prompt", promptRouter);
 
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 app.use(errorHandler);
