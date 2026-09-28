@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { addMessage, selectMessages } from '../app/slices/chatSlice'
 import { takePendingPrompt } from '../lib/pendingPrompt'
 import { useGenerateMutation } from '../services/api'
+import CourseView from './CourseView'
 
 const MAX_HEIGHT = 200
 
@@ -27,9 +28,8 @@ export default function ChatUI() {
 
     try {
       const response = await generate(cleanPrompt).unwrap();
-      dispatch(addMessage(response.text, "assistant"));
+      dispatch(addMessage(response.course, "assistant"));
     } catch (err) {
-      console.error("generation failed :: ", err);
       dispatch(addMessage("Something went wrong. Please try again.", "assistant"));
     }
   };
@@ -67,28 +67,27 @@ export default function ChatUI() {
     el.style.height = `${Math.min(el.scrollHeight, MAX_HEIGHT)}px`;
   }, [prompt]);
 
+  // Only follow the "Thinking…" indicator; a finished course should stay scrolled to its top.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages, isLoading]);
+    if (isLoading) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+  }, [isLoading]);
 
 
   return (
     <div className="relative h-full">
-      <div className="h-full overflow-y-auto px-4 pt-6 pb-36">
-        <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
-          {messages.map((m) => (
-            <div key={m.id} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-              <p
-                className={`max-w-[85%] rounded-3xl px-4 py-2.5 text-[15px] leading-6 whitespace-pre-wrap ${
-                  m.role === "user"
-                    ? "rounded-br-lg bg-zinc-900 text-white"
-                    : "rounded-bl-lg border border-zinc-200 bg-white text-zinc-800"
-                }`}
-              >
-                {m.text}
-              </p>
-            </div>
-          ))}
+      <div className="h-full overflow-y-auto px-4 pt-6 pb-36 sm:px-8">
+        <div className="flex w-full flex-col gap-8">
+          {messages
+            .filter((m) => m.role === "assistant")
+            .map((m) =>
+              typeof m.text === "string" ? (
+                <p key={m.id} className="text-sm text-zinc-500">{m.text}</p>
+              ) : (
+                <CourseView key={m.id} course={m.text} />
+              )
+            )}
           {isLoading && (
             <p className="text-sm text-zinc-400" role="status">Thinking…</p>
           )}
