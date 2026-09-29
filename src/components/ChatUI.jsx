@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { addMessage, selectMessages } from '../app/slices/chatSlice'
 import { takePendingPrompt } from '../lib/pendingPrompt'
-import { useGenerateMutation } from '../services/api'
+import { useGenerateCourseMutation } from '../services/api'
 import CourseView from './CourseView'
 
 const MAX_HEIGHT = 200
@@ -10,7 +10,7 @@ const MAX_HEIGHT = 200
 export default function ChatUI() {
   const dispatch = useDispatch();
   const messages = useSelector(selectMessages);
-  const [generate, { isLoading }] = useGenerateMutation();
+  const [generate, { isLoading }] = useGenerateCourseMutation();
 
   const [prompt, setPrompt] = useState("");
   const textareaRef = useRef(null);

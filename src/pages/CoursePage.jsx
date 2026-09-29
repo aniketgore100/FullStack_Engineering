@@ -1,11 +1,11 @@
 import { useParams } from "react-router-dom";
-import { useCourseQuery } from "../services/api";
+import { useGetCourseByIdQuery } from "../services/api";
 import CourseView from "../components/CourseView";
 
 export default function CoursePage() {
 
   const { courseId } = useParams();
-  const { data, isLoading, error } = useCourseQuery(courseId);
+  const { data, isLoading, error } = useGetCourseByIdQuery(courseId);
 
   const course = data?.data;
 

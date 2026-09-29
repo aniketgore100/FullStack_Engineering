@@ -29,21 +29,21 @@ export const api = createApi({
 
     endpoints : (builder) => ({
 
-        generate : builder.mutation({
+        generateCourse : builder.mutation({
             query : (prompt) => (
                 {
-                url : "api/prompt/generate",
+                url : "api/courses",
                 method : "POST",
                 body : {prompt}
             }),
         }),
 
         getCourses : builder.query({
-            query : () => "api/prompt/getCourse"
+            query : () => "api/courses"
         }),
 
-         course : builder.query({
-            query : (id) => `api/prompt/course/${id}`
+        getCourseById : builder.query({
+            query : (id) => `api/courses/${id}`
         }),
 
        
@@ -51,4 +51,4 @@ export const api = createApi({
     }),
 });
 
-export const {useGetUsersQuery, useGenerateMutation, useGetCoursesQuery, useCourseQuery} = api;
+export const {useGetUsersQuery, useGenerateCourseMutation, useGetCoursesQuery, useGetCourseByIdQuery} = api;
