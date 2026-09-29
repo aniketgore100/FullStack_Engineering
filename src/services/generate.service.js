@@ -56,18 +56,59 @@ export const generateCourse = async (userId, prompt) => {
 export const getCourses = async (userId) => {
     try {
         const result = prisma.courseGeneration.findMany({
-            where:{
-                userId : userId
+            where: {
+                userId: userId
             },
-            select :{
-                id : true,
-                prompt : true,
-                status : true,
-                createdAt : true,
-                updatedAt : true
+            select: {
+                id: true,
+                prompt: true,
+                status: true,
+                createdAt: true,
+                updatedAt: true,
+
+                course: {
+                    select: {
+                        id: true
+                    }
+                }
+
             }
         })
         return result;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const course = async (userId, courseId) => {
+    try {
+        const courseDetails = await prisma.course.findUnique({
+            where: {
+                id: courseId,
+                generation : {
+                    userId : userId
+                },
+            },
+            select: {
+                id : true,
+                title: true,
+                description : true,
+                createdAt : true,
+                updatedAt : true,
+
+                modules : {
+                    select : {
+                        id : true,
+                        title : true,
+                        description : true,
+                        order : true,
+                        createdAt : true,
+                        updatedAt : true
+                    }
+                }
+            }
+        });
+        return courseDetails;
     } catch (error) {
         throw error;
     }

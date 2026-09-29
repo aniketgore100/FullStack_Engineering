@@ -1,10 +1,12 @@
 import { Router } from "express";
-import { generate, getCourse } from "../controllers/generate.controller.js";
+import { courses, generate, getCourseDetails } from "../controllers/generate.controller.js";
 import { requireAuth } from "../middleware/requireAuth.js";
+import { course, getCourses } from "../services/generate.service.js";
 
 const router = Router();
 
 router.post("/generate", requireAuth, generate);
-router.get("/getCourse", requireAuth, getCourse);
+router.get("/getCourse", requireAuth, courses);
+router.get("/course/:id", requireAuth, getCourseDetails);
 
 export default router;

@@ -21,7 +21,7 @@ export const config = {
   },
 };
 
-export const ACCESS_TTL_SECONDS = 60 * 15;
+export const ACCESS_TTL_SECONDS = 60 * 60 * 24 * 7;
 export const REFRESH_TTL_SECONDS = 60 * 60 * 24 * 30;
 // A just-rotated token presented again within this window (e.g. two tabs racing)
 // is rejected but does not burn the whole token family.
