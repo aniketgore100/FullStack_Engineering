@@ -80,7 +80,7 @@ export const getCourses = async (userId) => {
     }
 }
 
-export const course = async (userId, courseId) => {
+export const getCourseById = async (userId, courseId) => {
     try {
         const courseDetails = await prisma.course.findUnique({
             where: {

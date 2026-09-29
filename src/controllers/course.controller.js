@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { generateCourseRequestSchema } from "../schemas/course.schema.js";
-import { course, generateCourse, getCourses } from "../services/generate.service.js"
+import { getCourseById, generateCourse, getCourses } from "../services/course.service.js"
 
-export const generate = async (req, res) => {
+export const createCourse = async (req, res) => {
     try {
 
         const parsed = generateCourseRequestSchema.safeParse(req.body);
@@ -30,7 +30,7 @@ export const generate = async (req, res) => {
 
 
 
-export const courses = async (req, res) => {
+export const listCourses = async (req, res) => {
     try {
         const userId = req.userId;
         const result = await getCourses(userId);
@@ -58,7 +58,7 @@ export const getCourseDetails = async (req, res) => {
             })
         }
 
-        const result = await course(userId, courseId);
+        const result = await getCourseById(userId, courseId);
 
         return res.status(201).json({
             message: "Data Fetched Successfully",

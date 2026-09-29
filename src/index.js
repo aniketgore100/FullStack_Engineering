@@ -4,8 +4,8 @@ import morgan from "morgan";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { config } from "./lib/config.js";
-import authRouter from "./routes/auth.js";
-import promptRouter from "./routes/prompt.js";
+import authRouter from "./routes/auth.routes.js";
+import courseRouter from "./routes/course.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
@@ -18,7 +18,7 @@ app.use(cookieParser());
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
 app.use("/api/auth", authRouter);
-app.use("/api/prompt", promptRouter);
+app.use("/api/courses", courseRouter);
 
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 app.use(errorHandler);
