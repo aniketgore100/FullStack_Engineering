@@ -4,6 +4,7 @@ import Home from "./pages/home";
 import Landing from "./pages/Landing";
 import AuthCallback from "./pages/AuthCallback";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CoursePage from "./pages/CoursePage";
 
 function App() {
   return (
@@ -12,7 +13,8 @@ function App() {
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
-          <Route path="/app" element={<Home />} />
+          <Route path = "/app" element = { <Home /> } />
+          <Route path = "/course/:courseId" element = {<CoursePage/>}/>
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

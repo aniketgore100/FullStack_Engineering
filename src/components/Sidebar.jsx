@@ -7,11 +7,20 @@ import {
   X,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useGetCoursesQuery } from "../services/api";
 
-const settings = { 
-  label: "Settings", to: "/settings", icon: Settings,
-  label: "Generate", to: "/app", icon: Sparkles
-};
+const navigation = [
+  {
+    label: "Generate",
+    to: "/app",
+    icon: Sparkles,
+  },
+  {
+    label: "Settings",
+    to: "/settings",
+    icon: Settings,
+  },
+];
 
 function Item({ item, collapsed, onNavigate }) {
   const Icon = item.icon;
@@ -37,19 +46,65 @@ function Item({ item, collapsed, onNavigate }) {
           {isActive && (
             <span className="absolute -left-2 h-4 w-0.5 rounded-full bg-indigo-600" />
           )}
-          <Icon size={16} strokeWidth={isActive ? 2.2 : 1.8} className="shrink-0" />
-          {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+
+          <Icon
+            size={16}
+            strokeWidth={isActive ? 2.2 : 1.8}
+            className="shrink-0"
+          />
+
+          {!collapsed && (
+            <span className="flex-1 truncate">{item.label}</span>
+          )}
         </>
       )}
     </NavLink>
   );
 }
 
-function SidebarContent({ collapsed, onToggle, mobile, onNavigate }) {
+function CourseItem({ course, collapsed }) {
+
+  const courseId = course.course?.id;
+  
   return (
-    <div className="flex h-full flex-col">
+    <NavLink
+      to={`/course/${courseId}`}
+      title={collapsed ? course.prompt : undefined}
+      className={({ isActive }) =>
+        `group flex min-h-8 items-center rounded-md text-[13px] font-medium transition-colors ${
+          collapsed ? "justify-center" : "px-2.5"
+        } ${
+          isActive
+            ? "bg-indigo-50 text-indigo-700"
+            : "text-zinc-600 hover:bg-black/5 hover:text-zinc-900"
+        }`
+      }
+    >
+      {!collapsed ? (
+        <span className="block w-full truncate">{course.prompt}</span>
+      ) : (
+        <span className="grid h-6 w-6 place-items-center rounded-md bg-zinc-100 text-[10px] font-semibold text-zinc-500">
+          {course.prompt?.charAt(0)?.toUpperCase() || "C"}
+        </span>
+      )}
+    </NavLink>
+  );
+}
+
+function SidebarContent({ collapsed, onToggle, mobile, onNavigate }) {
+  const {
+    data,
+    isLoading,
+    isError,
+  } = useGetCoursesQuery();
+
+  const courses = data?.course ?? [];
+
+  return (
+    <div className="flex h-full min-h-0 flex-col">
+      {/* Header */}
       <div
-        className={`flex border-b border-zinc-100 ${
+        className={`flex shrink-0 border-b border-zinc-100 ${
           collapsed
             ? "flex-col items-center gap-1 py-2"
             : "h-14 items-center justify-between px-3"
@@ -59,16 +114,22 @@ function SidebarContent({ collapsed, onToggle, mobile, onNavigate }) {
           <div className="grid h-7 w-7 place-items-center rounded-lg bg-linear-to-br from-indigo-500 to-violet-600 text-white shadow-sm">
             <Sparkles size={14} />
           </div>
+
           {!collapsed && (
             <span className="text-[15px] font-semibold tracking-tight text-zinc-900">
               Courseify
             </span>
           )}
         </div>
+
         <button
           onClick={onToggle}
           aria-label={
-            mobile ? "Close menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"
+            mobile
+              ? "Close menu"
+              : collapsed
+                ? "Expand sidebar"
+                : "Collapse sidebar"
           }
           className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-black/5 hover:text-zinc-700"
         >
@@ -82,31 +143,101 @@ function SidebarContent({ collapsed, onToggle, mobile, onNavigate }) {
         </button>
       </div>
 
-      {/* nav */}
-      <nav className="flex-1 space-y-4 overflow-y-auto px-2 py-3">
-        <div className="space-y-0.5">
+      {/* Main sidebar content */}
+      <div className="flex min-h-0 flex-1 flex-col">
+        {/* Navigation */}
+        <nav className="shrink-0 space-y-4 px-2 py-3">
           {!collapsed && (
             <p className="px-2.5 pb-1 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
               Account
             </p>
           )}
-          <Item item={settings} collapsed={collapsed} onNavigate={onNavigate} />
-        </div>
-      </nav>
 
-      {/* bottom */}
-      <div className="space-y-2 border-t border-zinc-100 p-2">
+          <div className="space-y-0.5">
+            {navigation.map((item) => (
+              <Item
+                key={item.to}
+                item={item}
+                collapsed={collapsed}
+                onNavigate={onNavigate}
+              />
+            ))}
+          </div>
+        </nav>
+
+        {/* Courses */}
+        <div
+          className={`min-h-0 border-t border-zinc-100 px-2 py-3 ${
+            collapsed ? "max-h-[60%]" : "max-h-[60%]"
+          }`}
+        >
+          {!collapsed && (
+            <div className="flex items-center justify-between px-2.5 pb-2">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                Courses
+              </p>
+
+              {courses.length > 0 && (
+                <span className="text-[10px] font-medium text-zinc-400">
+                  {courses.length}
+                </span>
+              )}
+            </div>
+          )}
+
+          <div className="min-h-0 overflow-y-auto pr-1">
+            {isLoading ? (
+              <div className="space-y-1">
+                {[1, 2, 3].map((item) => (
+                  <div
+                    key={item}
+                    className="h-8 animate-pulse rounded-md bg-zinc-100"
+                  />
+                ))}
+              </div>
+            ) : isError ? (
+              !collapsed && (
+                <p className="px-2.5 py-2 text-[12px] text-zinc-400">
+                  Unable to load courses.
+                </p>
+              )
+            ) : courses.length === 0 ? (
+              !collapsed && (
+                <p className="px-2.5 py-2 text-[12px] text-zinc-400">
+                  No courses yet.
+                </p>
+              )
+            ) : (
+              <div className="space-y-0.5">
+                {courses.map((course) => (
+                  <CourseItem
+                    key={course.id}
+                    course={course}
+                    collapsed={collapsed}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom */}
+      <div className="shrink-0 space-y-2 border-t border-zinc-100 p-2">
         {!collapsed && (
           <div className="rounded-lg border border-zinc-200 bg-white/70 p-2.5">
             <div className="flex items-center justify-between text-[12px]">
               <span className="font-medium text-zinc-700">Credits</span>
+
               <span className="text-zinc-500">
                 <b className="font-semibold text-zinc-800">38</b> / 50
               </span>
             </div>
+
             <div className="mt-2 h-1 overflow-hidden rounded-full bg-zinc-200">
               <div className="h-full w-[76%] rounded-full bg-indigo-500" />
             </div>
+
             <button className="mt-2.5 w-full rounded-md bg-zinc-900 py-1.5 text-[12px] font-medium text-white transition-colors hover:bg-zinc-700 active:scale-[0.98]">
               Upgrade to Pro
             </button>
@@ -120,6 +251,7 @@ function SidebarContent({ collapsed, onToggle, mobile, onNavigate }) {
           }`}
         >
           <LifeBuoy size={16} strokeWidth={1.8} />
+
           {!collapsed && <span>Help &amp; support</span>}
         </button>
       </div>
@@ -135,16 +267,19 @@ export default function Sidebar({
 }) {
   return (
     <>
-      {/* desktop */}
+      {/* Desktop */}
       <aside
         className={`hidden shrink-0 border-r border-zinc-200/80 bg-cream-dark/60 transition-[width] duration-200 ease-out md:block ${
           collapsed ? "w-14" : "w-56"
         }`}
       >
-        <SidebarContent collapsed={collapsed} onToggle={onToggle} />
+        <SidebarContent
+          collapsed={collapsed}
+          onToggle={onToggle}
+        />
       </aside>
 
-      {/* mobile drawer */}
+      {/* Mobile */}
       <div
         className={`fixed inset-0 z-40 md:hidden ${
           mobileOpen ? "" : "pointer-events-none"
@@ -156,13 +291,18 @@ export default function Sidebar({
             mobileOpen ? "opacity-100" : "opacity-0"
           }`}
         />
+
         <aside
           inert={!mobileOpen}
           className={`absolute inset-y-0 left-0 w-64 max-w-[80vw] border-r border-zinc-200 bg-cream shadow-xl transition-transform duration-200 ease-out ${
             mobileOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          <SidebarContent mobile onToggle={onMobileClose} onNavigate={onMobileClose} />
+          <SidebarContent
+            mobile
+            onToggle={onMobileClose}
+            onNavigate={onMobileClose}
+          />
         </aside>
       </div>
     </>

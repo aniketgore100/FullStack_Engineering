@@ -3,7 +3,11 @@ import { api } from "../services/api";
 import { SESSION_EXPIRED_EVENT } from "../lib/auth";
 import authReducer, { sessionExpired } from "./slices/authSlice";
 import chatReducer from "./slices/chatSlice";
+import courseReducer from "./slices/courseSlice"
 import uiReducer, { SIDEBAR_KEY } from "./slices/uiSlice";
+
+
+
 
 export const store = configureStore({
   reducer: {
@@ -11,14 +15,14 @@ export const store = configureStore({
     auth: authReducer,
     chat: chatReducer,
     ui: uiReducer,
+    course : courseReducer
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(api.middleware),
 });
 
-// authFetch/RTK Query signal a rejected refresh token with a window event
-window.addEventListener(SESSION_EXPIRED_EVENT, () => store.dispatch(sessionExpired()));
 
-// persist the sidebar preference
+
+window.addEventListener(SESSION_EXPIRED_EVENT, () => store.dispatch(sessionExpired()));
 let collapsed = store.getState().ui.sidebarCollapsed;
 store.subscribe(() => {
   const next = store.getState().ui.sidebarCollapsed;
@@ -29,6 +33,5 @@ store.subscribe(() => {
   try {
     localStorage.setItem(SIDEBAR_KEY, next ? "1" : "0");
   } catch {
-    /* storage unavailable */
   }
 });

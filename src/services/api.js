@@ -31,7 +31,6 @@ export const api = createApi({
 
         generate : builder.mutation({
             query : (prompt) => (
-                console.log("prompt :: ", prompt),
                 {
                 url : "api/prompt/generate",
                 method : "POST",
@@ -39,7 +38,17 @@ export const api = createApi({
             }),
         }),
 
+        getCourses : builder.query({
+            query : () => "api/prompt/getCourse"
+        }),
+
+         course : builder.query({
+            query : (id) => `api/prompt/course/${id}`
+        }),
+
+       
+
     }),
 });
 
-export const {useGetUsersQuery, useGenerateMutation} = api;
+export const {useGetUsersQuery, useGenerateMutation, useGetCoursesQuery, useCourseQuery} = api;
