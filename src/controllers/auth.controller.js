@@ -10,6 +10,7 @@ const toClient = (res, params) =>
 const clientMeta = (req) => ({ userAgent: req.get("user-agent"), ip: req.ip });
 
 const STATE_RE = /^[A-Za-z0-9_-]{16,128}$/;
+const STATE_COOKIE = "oauth_state";
 
 
 
@@ -19,6 +20,12 @@ export function googleRedirect(req, res) {
   if (typeof state !== "string" || !STATE_RE.test(state)) {
     return res.status(400).json({ error: "Missing or invalid state" });
   }
+  res.cookie(STATE_COOKIE, state, {
+    httpOnly: true,
+    secure: config.clientOrigin.startsWith("https"),
+    sameSite: "lax",
+    maxAge: 10 * 60 * 1000,
+  });
   res.redirect(buildAuthUrl(state));
 
 }
@@ -28,8 +35,10 @@ export function googleRedirect(req, res) {
 export async function googleCallback(req, res) {
 
   const { code, state, error } = req.query;
+  const cookieState = req.cookies?.[STATE_COOKIE];
+  res.clearCookie(STATE_COOKIE);
 
-  if (!state || typeof state !== "string") {
+  if (!state || typeof state !== "string" || !cookieState || state !== cookieState) {
     return toClient(res, { error: "invalid_state" });
   }
 

@@ -1,11 +1,19 @@
-import { courseOutlineSchema } from "../schemas/course.schema.js";
+import { z } from "zod";
+import { generateCourseRequestSchema } from "../schemas/course.schema.js";
 import { course, generateCourse, getCourses } from "../services/generate.service.js"
 
 export const generate = async (req, res) => {
     try {
 
-        const input = req.body;
-        const result = await generateCourse(req.userId, input.prompt);
+        const parsed = generateCourseRequestSchema.safeParse(req.body);
+        if (!parsed.success) {
+            return res.status(400).json({
+                message: "Invalid request",
+                errors: z.flattenError(parsed.error).fieldErrors,
+            });
+        }
+
+        const result = await generateCourse(req.userId, parsed.data.prompt);
 
         return res.status(201).json({
             message: "Course generated successfully",
