@@ -1,4 +1,5 @@
 import { BarChart3, Clock, Layers, Play } from "lucide-react";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const DEFAULT_TIME = "4 hours";
 const DEFAULT_DIFFICULTY = "Beginner";
@@ -27,10 +28,18 @@ function ModuleCard({ module }) {
 }
 
 export default function CourseView({ course }) {
+
   const modules = [...course.modules].sort((a, b) => a.order - b.order);
+  console.log("CourseView modules:", course.id);
   const time = course.estimatedTime || DEFAULT_TIME;
   const difficulty = course.difficulty || DEFAULT_DIFFICULTY;
   const progress = Math.min(100, Math.max(0, Number(course.progress) || 0));
+  const navigate = useNavigate();
+
+  const goToModule = (moduleOrder) => {
+    console.log("Navigating to module:", moduleOrder);
+    navigate(`/course/${course.id}/module/${moduleOrder}`);
+  }
 
   return (
     <section className="flex w-full flex-col gap-4">
@@ -49,6 +58,7 @@ export default function CourseView({ course }) {
           <button
             type="button"
             className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-brand px-5 text-[13px] font-semibold text-white transition hover:opacity-90"
+            onClick={() => goToModule(modules[0].order)}
           >
             <Play size={12} fill="currentColor" />
             Start Course

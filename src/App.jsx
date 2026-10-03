@@ -5,6 +5,7 @@ import Landing from "./pages/Landing";
 import AuthCallback from "./pages/AuthCallback";
 import ProtectedRoute from "./components/ProtectedRoute";
 import CoursePage from "./pages/CoursePage";
+import ModulePage from "./pages/ModulePage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route element={<AppLayout />}>
           <Route path = "/app" element = { <Home /> } />
           <Route path = "/course/:courseId" element = {<CoursePage/>}/>
+          <Route path = "/course/:courseId/module/:moduleOrder" element = {<ModulePage/> }/>
         </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
